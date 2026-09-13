@@ -199,7 +199,7 @@ func BSIV20CompDependencies(doc sbom.Document) catalog.ProfFeatScore {
 				Ignore: false,
 			}
 		}
-		if _, ok := componentMap[r.GetFrom()]; !ok {
+		if _, ok := componentMap[r.GetTo()]; !ok {
 			return catalog.ProfFeatScore{
 				Score:  0.0,
 				Desc:   "Broken dependency: target ref points to undefined component.",
@@ -227,7 +227,7 @@ func BSIV20CompDependencies(doc sbom.Document) catalog.ProfFeatScore {
 		}
 		visited[id] = true
 		for _, rel := range doc.GetOutgoingRelations(id) {
-			if rel.GetType() == "DEPENDS_ON" {
+			if rel.GetType() == "DEPENDS_ON" || rel.GetType() == "CONTAINS" {
 				dfs(rel.GetTo())
 			}
 		}
@@ -244,7 +244,7 @@ func BSIV20CompDependencies(doc sbom.Document) catalog.ProfFeatScore {
 			orphanCount++
 		}
 	}
-	if orphanCount > 1 {
+	if orphanCount > 0 {
 		return catalog.ProfFeatScore{
 			Score:  5.0,
 			Desc:   fmt.Sprintf("Dependency graph incomplete: %d orphan component(s) found.", orphanCount),
