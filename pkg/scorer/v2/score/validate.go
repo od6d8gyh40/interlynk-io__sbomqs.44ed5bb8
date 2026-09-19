@@ -75,10 +75,6 @@ func validateAndExpandPaths(ctx context.Context, paths []string, recursive bool)
 						return nil
 					}
 
-					if p == path {
-						return nil
-					}
-
 					if d.Type().IsRegular() {
 						utils.AppendUnique(&validPaths, alreadyExist, p)
 					}
@@ -103,7 +99,7 @@ func validateAndExpandPaths(ctx context.Context, paths []string, recursive bool)
 
 			for _, file := range files {
 				if file.Type().IsRegular() {
-					utils.AppendUnique(&validPaths, alreadyExist, file.Name())
+					utils.AppendUnique(&validPaths, alreadyExist, filepath.Join(path, file.Name()))
 				}
 			}
 
@@ -115,7 +111,7 @@ func validateAndExpandPaths(ctx context.Context, paths []string, recursive bool)
 	}
 
 	// optional: ensure deterministic order (helps tests & diffs)
-	sort.Sort(sort.Reverse(sort.StringSlice(validPaths)))
+	sort.Strings(validPaths)
 
 	log.Debug("Path validation completed",
 		zap.Int("valid", len(validPaths)),
