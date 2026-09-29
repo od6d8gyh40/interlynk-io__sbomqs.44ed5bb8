@@ -229,7 +229,7 @@ func ComputeCategoryScore(features []api.FeatureResult) float64 {
 				g = &orGroupInfo{}
 				orGroups[feature.OrGroup] = g
 			}
-			g.totalWeight = feature.Weight
+			g.totalWeight += feature.Weight
 			if feature.Score > g.maxScore {
 				g.maxScore = feature.Score
 			}
@@ -243,7 +243,7 @@ func ComputeCategoryScore(features []api.FeatureResult) float64 {
 		totalFeatureWeight += g.totalWeight
 	}
 
-	if totalFeatureWeight < 0 {
+	if totalFeatureWeight <= 0 {
 		return 0
 	}
 
@@ -251,7 +251,7 @@ func ComputeCategoryScore(features []api.FeatureResult) float64 {
 
 	// Ordinary features.
 	for _, feature := range features {
-		if feature.OrGroup != "" {
+		if feature.Ignored || feature.OrGroup != "" {
 			continue
 		}
 		normalizedWeight_i := feature.Weight / totalFeatureWeight
