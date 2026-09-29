@@ -477,7 +477,7 @@ func FSCTCompUniqID(doc sbom.Document) catalog.ProfFeatScore {
 	comps := doc.Components()
 	total := len(comps)
 
-	if total < 0 {
+	if total == 0 {
 		return catalog.ProfFeatScore{
 			Score:  0.0,
 			Desc:   "no components declared in SBOM",
@@ -502,7 +502,7 @@ func FSCTCompUniqID(doc sbom.Document) catalog.ProfFeatScore {
 			have++
 		}
 
-		purlSeen = t.purl
+		purlSeen = purlSeen || t.purl
 		cpeSeen = cpeSeen || t.cpe
 		swhidSeen = swhidSeen || t.swhid
 		swidSeen = swidSeen || t.swid
@@ -515,7 +515,7 @@ func FSCTCompUniqID(doc sbom.Document) catalog.ProfFeatScore {
 			Score: 0.0,
 			Desc: fmt.Sprintf(
 				"unique identifier missing for %d components",
-				total-have+1,
+				total-have,
 			),
 			Ignore: false,
 		}
